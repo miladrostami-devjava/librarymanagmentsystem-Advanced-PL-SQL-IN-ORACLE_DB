@@ -463,6 +463,85 @@ VALUES (seq_library_borrowing_trans.nextval, 12, 13, TO_DATE('2023-10-10', 'YYYY
 
 -- step9:
 --create packages in project library_management system:
+-- use is instead of as
+create or replace procedure add_user(
+    p_username varchar2,
+    p_email varchar2
+) is
+    new_user_id number;
+begin
+savepoint before_insert;
+begin
+        new_user_id := SEQ_LIBRARY_USERS.nextval;
+insert into LIBRARY_USERS (LIBRARY_USERS_ID, LIBRARY_USERS_USERNAME, LIBRARY_USERS_EMAIL,
+                           LIBRARY_USERS_MEMBERSHIP_DATE)
+VALUES (new_user_id,p_username,p_email,sysdate);
+exception
+    when APEX_UI_DEFAULT_UPDATE THEN
+        rollback to before_insert;
+        raise_application_error(-2000,'Duplicate user id ');
+when SDO_PREFERRED_OPS_USER then
+        raise_application_error(2000,'this is problem');
+when WWV_FLOW_HELP then
+        raise_application_error(3000,'problem is very ...');
+end;
+commit ;
+end;
+
+    -- use as instead of is
+
+create or replace procedure add_user2(
+    p_username varchar2,
+    p_email varchar2
+) as
+    new_user_id number;
+begin
+savepoint before_insert;
+begin
+        new_user_id := SEQ_LIBRARY_USERS.nextval;
+insert into LIBRARY_USERS (LIBRARY_USERS_ID, LIBRARY_USERS_USERNAME, LIBRARY_USERS_EMAIL,
+                           LIBRARY_USERS_MEMBERSHIP_DATE)
+VALUES (new_user_id,p_username,p_email,sysdate);
+exception
+        when APEX_UI_DEFAULT_UPDATE THEN
+            rollback to before_insert;
+            raise_application_error(-2000,'Duplicate user id ');
+when SDO_PREFERRED_OPS_USER then
+            raise_application_error(2000,'this is problem');
+when WWV_FLOW_HELP then
+            raise_application_error(3000,'problem is very ...');
+end;
+commit ;
+end;
+
+    -- define procedure for delete user by id
+    create or replace procedure delete_user_by_id(
+        p_user_id number
+        ) is
+begin
+delete from LIBRARY_USERS where p_user_id:= LIBRARY_USERS_ID;
+commit ;
+
+exception
+    when no_data_found then
+        raise_application_error(30000,'not found data for this id!!!!');
+end;
+
+        -- define function for count borrowed book by user
+        create or replace function borrowed_user_book(
+            p_user_id number
+        ) return number is
+        borrowed_count number;
+begin
+select count(*)
+into borrowed_count
+from LIBRARY_BORROWING_TRANSACTIONS bt
+where LIBRARY_USERS_ID := bt.LIBRARY_B_TRANSACTIONS_ID ;
+return borrowed_count;
+exception
+            when ST_ANNOTATION_TEXT then
+                return (0);
+end borrowed_user_book;
 
 
 
