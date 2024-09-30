@@ -543,6 +543,169 @@ exception
                 return (0);
 end borrowed_user_book;
 
+-- define procedure for delete user by id
+create or replace procedure delete_user_by_id(
+    p_user_id number
+) is
+begin
+delete from LIBRARY_USERS where p_user_id := LIBRARY_USERS_ID;
+commit;
+
+exception
+    when no_data_found then
+        raise_application_error(30000, 'not found data for this id!!!!');
+end;
+
+-- define function for count borrowed book by user
+create or replace function borrowed_user_book(
+    p_user_id number
+) return number is
+    borrowed_count number;
+begin
+select count(*)
+into borrowed_count
+from LIBRARY_BORROWING_TRANSACTIONS bt
+where LIBRARY_USERS_ID := bt.LIBRARY_B_TRANSACTIONS_ID;
+return borrowed_count;
+exception
+    when ST_ANNOTATION_TEXT then
+        return (0);
+end borrowed_user_book;
+
+
+-- object 2 : bookManagement
+
+-- add new book
+create or replace procedure add_book(
+    p_title in varchar2,
+    p_auther_id in number,
+    p_published_year in number,
+    p_genre_id in number
+) is
+    new_book_id number;
+begin
+    new_book_id := SEQ_LIBRARY_BOOKS.nextval;
+insert into LIBRARY_BOOKS (LIBRARY_BOOKS_ID, LIBRARY_BOOKS_TITLE, LIBRARY_BOOKS_AUTHOR_ID,
+                           LIBRARY_BOOKS_PUBLISHED_YEAR, LIBRARY_BOOKS_GENRE_ID, LIBRARY_AUTHORS_ID,
+                           LIBRARY_GENRES_ID)
+VALUES (new_book_id, p_title, p_auther_id, p_published_year, p_genre_id);
+commit;
+end;
+
+-- update book
+create or replace procedure update_book(
+    p_book_id IN NUMBER,
+    p_title IN VARCHAR2,
+    p_published_year IN NUMBER
+) is
+begin
+update
+    LIBRARY_BOOKS
+set LIBRARY_BOOKS_TITLE          = p_title,
+    LIBRARY_BOOKS_PUBLISHED_YEAR = p_published_year
+where LIBRARY_BOOKS_ID = p_book_id;
+if sql%rowcount = 0 then
+        raise_application_error(234, 'book not found!!!');
+end if;
+commit;
+end;
+
+-- object 3 : TransactionManagement
+
+-- register borrow book transaction
+CREATE OR REPLACE PROCEDURE borrow_book(
+    p_user_id IN NUMBER,
+    p_book_id IN NUMBER
+) IS
+    new_transaction_id NUMBER;
+begin
+    new_transaction_id := SEQ_LIBRARY_BORROWING_TRANS.nextval;
+insert into LIBRARY_BORROWING_TRANSACTIONS(LIBRARY_B_TRANSACTIONS_ID, LIBRARY_USERS_ID, LIBRARY_BOOKS_ID,
+                                           LIBRARY_B_TRANS_B_DATE, LIBRARY_B_TRANS_R_DATE)
+VALUES (new_transaction_id, p_user_id, p_book_id, sysdate);
+commit;
+end;
+
+-- updating return book
+CREATE OR REPLACE PROCEDURE return_book(
+    p_transaction_id IN NUMBER
+) IS
+BEGIN
+update LIBRARY_BORROWING_TRANSACTIONS
+set LIBRARY_B_TRANS_R_DATE = sysdate
+where LIBRARY_B_TRANSACTIONS_ID = p_transaction_id;
+if sql%rowcount = 0 then
+        raise_application_error(3443, 'Transaction not found');
+end if;
+commit;
+end;
+
+-- review checking the borrowed books
+create or replace function check_borrow_book(
+    p_user_id number
+) return varchar2 is
+    v_book_id       number;
+    borrowed_status varchar2(1000) := '';
+begin
+for rec in (select LIBRARY_B_TRANSACTIONS_ID
+                from LIBRARY_BORROWING_TRANSACTIONS
+                where LIBRARY_USERS_ID = p_user_id
+                  and return_book(LIBRARY_BOOKS_ID) is null )
+        loop
+            borrowed_status :=
+                    borrowed_status || 'Book ID :' || rec.LIBRARY_B_TRANSACTIONS_ID || 'is not returned yet!' ||
+                    chr(10);
+end loop;
+    if borrowed_status is null then
+        return 'All books returned.';
+else
+        return borrowed_status;
+end if;
+
+end;
+
+-- trigger for before insert users in library
+create or replace trigger trg_insert_library_users
+before insert on LIBRARY_USERS
+for each row
+
+begin
+    if :NEW.library_users_id is null then
+select SEQ_LIBRARY_USERS.nextval
+into :NEW.library_users_id
+from dual;
+end if;
+end;
+
+
+create or replace trigger trg_alarm_register
+after insert on LIBRARY_USERS
+for each row
+begin
+    if :NEW.library_users_id > 323  then
+raise_application_error(444,'the insert not ok');
+else
+        raise_application_error(234,'the insert is ok');
+end if;
+end;
+
+
+create or replace trigger trg_before_update_users
+before update on LIBRARY_USERS
+                  for each row
+begin
+    if :OLD.LIBRARY_USERS_EMAIL <> :NEW.LIBRARY_USERS_EMAIL then
+        DBMS_OUTPUT.PUT_LINE('Email changed from :' || OLD.LIBRARY_USERS_EMAIL || 'to :' || NEW.LIBRARY_USERS_EMAIL);
+end if;
+end;
+
+CREATE OR REPLACE TRIGGER trg_before_delete_user
+    BEFORE DELETE ON Library_Users
+    FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Deleting user :'|| :OLD.LIBRARY_USERS_USERNAME);
+end;
+
 
 
 
