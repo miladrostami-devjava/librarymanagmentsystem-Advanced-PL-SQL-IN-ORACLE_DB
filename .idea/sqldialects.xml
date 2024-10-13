@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/collections_in_oracleDB.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/object_sample.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/package_in_oracle_db.sql" dialect="OracleSqlPlus" />
   </component>
