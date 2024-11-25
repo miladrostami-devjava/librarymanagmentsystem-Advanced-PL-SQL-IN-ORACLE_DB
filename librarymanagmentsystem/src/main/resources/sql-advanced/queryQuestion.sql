@@ -5,7 +5,6 @@ CREATE TABLE regions
     region_name VARCHAR2(50) NOT NULL
 );
 
-select * from regions;
 
 
 -- countries table
