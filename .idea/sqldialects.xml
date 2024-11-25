@@ -6,6 +6,7 @@
     <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/sql-advanced/object_sample.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/sql-advanced/package_in_oracle_db.sql" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/sql-advanced/queryQuestion.sql" dialect="Oracle" />
+    <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/view-in-oracle/apply_security_on_view.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/view-in-oracle/function_for_view.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/view-in-oracle/view_countries.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/librarymanagmentsystem/src/main/resources/view-in-oracle/view_with_read_only.sql" dialect="Oracle" />
